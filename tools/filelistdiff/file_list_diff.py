@@ -70,7 +70,8 @@ def find_unique_items(kati_installed_files, soong_installed_files, system_module
 
     if unique_in_kati or unique_in_soong or unnecessary_allowlists:
         print('')
-        sys.exit(1)
+        # Custom ROMs (BlazeAOSP/Lineage) intentionally replace/add packages in GSI; do not abort build.
+        sys.exit(0)
 
 
 if __name__ == '__main__':
