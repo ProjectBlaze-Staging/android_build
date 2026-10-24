@@ -16,6 +16,11 @@
 # to work when checking unbound variables is disallowed.
 set +u
 
+# Set POSIX/C locale to prevent Turkish I/ı lowercase conversion bug in Java/AutoValue/Turbine
+export LC_ALL=C
+export LANG=C.UTF-8
+export LANGUAGE=C
+
 # gettop is duplicated here and in shell_utils.mk, because it's difficult
 # to find shell_utils.make without it for all the novel ways this file can be
 # sourced.  Other common functions should only be in one place or the other.

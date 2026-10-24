@@ -95,12 +95,17 @@ android_filesystem_defaults {
         // gsi_system_ext
         ///////////////////////////////////////////
 
-        // handheld packages
         "Launcher3QuickStep",
         "Provision",
         "Settings",
         "StorageManager",
         "SystemUI",
+
+        // LineageOS Platform & SDK
+        "org.lineageos.platform",
+        "org.lineageos.platform.internal",
+        "org.lineageos.platform-res",
+        "LineageSettingsProvider",
 
         // Allowlist for handheld packages
         "preinstalled-packages-handheld-system-ext.xml",
