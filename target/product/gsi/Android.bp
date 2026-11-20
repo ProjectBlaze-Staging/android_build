@@ -98,14 +98,10 @@ android_filesystem_defaults {
         "Launcher3QuickStep",
         "Provision",
         "Settings",
+        "SettingsIntelligence",
+        "privapp_whitelist_com.android.settings.intelligence",
         "StorageManager",
         "SystemUI",
-
-        // LineageOS Platform & SDK
-        "org.lineageos.platform",
-        "org.lineageos.platform.internal",
-        "org.lineageos.platform-res",
-        "LineageSettingsProvider",
 
         // Allowlist for handheld packages
         "preinstalled-packages-handheld-system-ext.xml",
@@ -125,18 +121,22 @@ android_filesystem_defaults {
         "gsi_overlay_systemui",
 
         ///////////////////////////////////////////
-        // VNDK
+        // VNDK & Legacy FCM Compatibility (API 30-34)
         ///////////////////////////////////////////
+        "com.android.vndk.v30",
         "com.android.vndk.v31",
         "com.android.vndk.v32",
         "com.android.vndk.v33",
         "com.android.vndk.v34",
+        "compatibility_matrix.5.xml",
+        "compatibility_matrix.6.xml",
 
         ///////////////////////////////////////////
         // gsi_product
         ///////////////////////////////////////////
-        "Browser2",
-        "Camera2",
+        "webview",
+        "libwebviewchromium_loader",
+        "libwebviewchromium_plat_support",
         "Dialer",
         "LatinIME",
         "messaging",
@@ -185,6 +185,48 @@ android_system_image {
         // init-second-stage to load debug policy from system_ext.
         // This option is only meant to be set by compliance GSI targets.
         "system_ext_userdebug_plat_sepolicy.cil",
+
+        // LineageOS Platform & Setup
+        "LineageSetupWizard",
+        "org.lineageos.platform",
+        "org.lineageos.platform.internal",
+        "org.lineageos.platform-res",
+        "LineageSettingsProvider",
+
+        // Applications & Utilities
+        "Aperture",
+        "ApertureFrameworksBaseOverlay",
+        "ApertureLensLauncher",
+        "BlazeIcons",
+        "DeskClock",
+        "ExactCalculator",
+        "Gallery2",
+        "Recorder",
+        "Etar",
+        "AudioFX",
+        "Music",
+        "Firefox",
+        "FossifyGallery",
+
+        // Overlays & Themes
+        "Launcher3Overlay",
+        "PermissionControllerOverlay",
+        "NetworkStackOverlay",
+        "DocumentsUIOverlay",
+        "LineageBlackTheme",
+
+        // Boot animation
+        "bootanimation.zip",
+        "bootanimation-dark.zip",
+
+        // Wallpapers & Backgrounds
+        "Backgrounds",
+        "ThemePicker",
+        "WallpaperCropper",
+        "Wallpapera.jpg",
+        "Wallpaperb.jpg",
+        "Wallpaperl.jpg",
+
     ] + select(soong_config_variable("gsi", "import_usb_debugging_test_app"), {
         true: ["UsbDisableDebugger"],
         default: [],

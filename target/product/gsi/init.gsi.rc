@@ -3,3 +3,138 @@
 #
 
 import /system/system_ext/etc/gsi/init.vndk-${ro.vndk.version:-nodef}.rc
+
+# Legacy Android 11-14 vendors (VNDK 29-34) predate KeyMint v4 (Android 15 / 202404)
+# and do not support setAdditionalAttestationInfo(MODULE_HASH). Gate keystore.module_hash.sent
+# strictly by legacy VNDK version so KeyMint v4+ devices still receive genuine MODULE_HASH.
+on property:ro.vndk.version=29
+    setprop keystore.module_hash.sent true
+
+on property:ro.vndk.version=30
+    setprop keystore.module_hash.sent true
+
+on property:ro.vndk.version=31
+    setprop keystore.module_hash.sent true
+
+on property:ro.vndk.version=32
+    setprop keystore.module_hash.sent true
+
+on property:ro.vndk.version=33
+    setprop keystore.module_hash.sent true
+
+on property:ro.vndk.version=34
+    setprop keystore.module_hash.sent true
+
+on post-fs-data
+    # Universal Multi-Camera (Aux / Ultrawide / Telephoto) exposure for Xiaomi, OnePlus, Nothing, Realme
+    setprop vendor.camera.aux.packagelist "org.lineageos.aperture,com.android.camera,com.android.camera2,org.codeaurora.snapcam"
+    setprop persist.vendor.camera.privapp.list "org.lineageos.aperture,com.android.camera,com.android.camera2,org.codeaurora.snapcam"
+    setprop persist.sys.phh.include_all_cameras true
+    setprop debug.doze.aod true
+    setprop doze.display.supported false
+
+on property:sys.boot_completed=1
+    # Prevent broken router IPv6 RDNSS blackholes while keeping IPv4/IPv6 dual-stack fast
+    write /proc/sys/net/ipv6/conf/all/accept_ra_rdnss 0
+    write /proc/sys/net/ipv6/conf/default/accept_ra_rdnss 0
+    write /proc/sys/net/ipv6/conf/wlan0/accept_ra_rdnss 0
+    write /proc/sys/vm/swappiness 100
+
+on property:init.svc.wpa_supplicant=running
+    write /proc/sys/net/ipv6/conf/all/accept_ra_rdnss 0
+    write /proc/sys/net/ipv6/conf/default/accept_ra_rdnss 0
+    write /proc/sys/net/ipv6/conf/wlan0/accept_ra_rdnss 0
+
+on boot
+    # Tune ZRAM compression algorithm to LZ4 for low latency decompression
+    write /sys/block/zram0/comp_algorithm lz4
+    # Prevent broken router IPv6 RDNSS blackholes on early Wi-Fi bring-up
+    write /proc/sys/net/ipv6/conf/all/accept_ra_rdnss 0
+    write /proc/sys/net/ipv6/conf/default/accept_ra_rdnss 0
+    # Universal VoLTE / VoWiFi / VT IMS provisioning overrides for Qualcomm, MediaTek, Exynos & Tensor
+    setprop persist.dbg.volte_avail_ovr 1
+    setprop persist.dbg.vt_avail_ovr 1
+    setprop persist.dbg.wfc_avail_ovr 1
+    setprop persist.radio.rat_on combine
+    setprop persist.radio.data_ltd_sys_ind 1
+    setprop persist.radio.data_con_rprt 1
+
+    # Grant system/graphics access to multi-vendor Backlight & Optical UDFPS HBM sysfs nodes
+    chmod 0666 /sys/class/backlight/panel0-backlight/brightness
+    chmod 0666 /sys/class/backlight/panel/brightness
+    chmod 0666 /sys/class/leds/lcd-backlight/brightness
+    chmod 0666 /sys/class/drm/card0-DSI-1/disp_param
+    chmod 0666 /sys/kernel/oplus_display/notify_fppress
+    chmod 0666 /sys/kernel/oplus_display/dimlayer_hbm
+    chmod 0666 /sys/class/sec/tsp/cmd
+    chmod 0666 /sys/class/lcd/panel/mask_brightness
+
+# BlazeHouse Treble Toolkit: Optical UDFPS HBM triggers (Xiaomi, OnePlus/Oppo/Realme, Samsung)
+on property:sys.blaze.udfps_hbm=1
+    write /sys/class/drm/card0-DSI-1/disp_param 0x20000
+
+on property:sys.blaze.udfps_hbm=2
+    write /sys/kernel/oplus_display/dimlayer_hbm 1
+    write /sys/kernel/oplus_display/notify_fppress 1
+
+on property:sys.blaze.udfps_hbm=3
+    write /sys/class/sec/tsp/cmd "fod_enable,1,1,0"
+
+on property:sys.blaze.udfps_hbm=0
+    write /sys/class/drm/card0-DSI-1/disp_param 0xE0000
+    write /sys/kernel/oplus_display/notify_fppress 0
+    write /sys/kernel/oplus_display/dimlayer_hbm 0
+
+# BlazeHouse Treble Toolkit: Bluetooth A2DP Offload control (Qualcomm / Exynos / MediaTek audio fix)
+on property:persist.sys.blaze.bt_a2dp_offload_disable=1
+    setprop persist.bluetooth.a2dp_offload.disabled true
+    setprop vendor.audio.feature.a2dp_offload.enable false
+
+on property:persist.sys.blaze.bt_a2dp_offload_disable=0
+    setprop persist.bluetooth.a2dp_offload.disabled false
+    setprop vendor.audio.feature.a2dp_offload.enable true
+
+# BlazeHouse Treble Toolkit: SurfaceFlinger / GPU Buffer Latch compatibility (MediaTek / Exynos / Adreno)
+on property:persist.sys.blaze.sf_gl_compat=1
+    setprop debug.sf.latch_unsignaled 1
+    setprop debug.sf.auto_latch_unsignaled 0
+    setprop debug.sf.disable_backpressure 0
+
+on property:persist.sys.blaze.sf_gl_compat=0
+    setprop debug.sf.latch_unsignaled 0
+    setprop debug.sf.auto_latch_unsignaled 1
+    setprop debug.sf.disable_backpressure 0
+
+# Universal Samsung & Exynos Treble / GSI hardware compatibility (S21/S22/S23/S24 Exynos & OneUI vendor)
+on property:ro.product.vendor.manufacturer=samsung
+    setprop debug.sf.latch_unsignaled 1
+    setprop debug.sf.auto_latch_unsignaled 0
+    setprop debug.sf.disable_backpressure 0
+    setprop persist.bluetooth.a2dp_offload.disabled true
+    setprop vendor.audio.feature.a2dp_offload.enable false
+    setprop persist.sys.phh.samsung_backlight 1
+    chmod 0666 /sys/class/backlight/panel/brightness
+    chmod 0664 /sys/class/backlight/panel/max_brightness
+    chmod 0666 /sys/class/lcd/panel/brightness
+    chmod 0666 /sys/class/sec/tsp/cmd
+    write /sys/class/sec/tsp/cmd "fod_enable,1,1,0"
+
+on property:ro.hardware=exynos2100
+    setprop debug.sf.latch_unsignaled 1
+    setprop debug.sf.disable_backpressure 0
+    setprop ro.telephony.default_network 26
+    setprop persist.radio.multisim.config dsds
+
+on property:ro.board.platform=universal2100_r
+    setprop debug.sf.latch_unsignaled 1
+    setprop debug.sf.disable_backpressure 0
+
+# Universal Qualcomm Snapdragon Treble / GSI hardware compatibility
+on property:ro.hardware=qcom
+    setprop persist.vendor.radio.apm_sim_not_pwdn 1
+    setprop persist.vendor.radio.sib16_support 1
+    setprop persist.vendor.radio.custom_ecc 1
+    setprop persist.vendor.radio.rat_on combine
+    setprop vendor.camera.aux.packagelist "org.lineageos.aperture,com.android.camera,com.android.camera2,org.codeaurora.snapcam"
+    setprop persist.vendor.camera.privapp.list "org.lineageos.aperture,com.android.camera,com.android.camera2,org.codeaurora.snapcam"
+
